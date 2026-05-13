@@ -29,7 +29,14 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const parsed = applySchema.safeParse(body);
+  const cookieVariant = req.cookies.get("deltanova_variant")?.value;
+  const variantFromCookie =
+    cookieVariant === "a" || cookieVariant === "b" ? cookieVariant : undefined;
+
+  const parsed = applySchema.safeParse({
+    ...(typeof body === "object" && body !== null ? body : {}),
+    variant: (body as { variant?: string })?.variant ?? variantFromCookie,
+  });
   if (!parsed.success) {
     return NextResponse.json(
       { ok: false, errors: parsed.error.issues },
@@ -82,7 +89,7 @@ async function writeToNotion(app: Application) {
               {
                 type: "text",
                 text: {
-                  content: `${app.name} — ${app.email}\n${app.link}\nLocale: ${app.locale}`,
+                  content: `${app.name} — ${app.email}\n${app.link}\nLocale: ${app.locale}\nDesign variant: ${app.variant ?? "unknown"}`,
                 },
               },
             ],
@@ -118,7 +125,7 @@ async function writeToNotion(app: Application) {
 async function sendFounderNotification(app: Application) {
   if (!resend) return { ok: false, reason: "resend-disabled" };
   try {
-    const subject = `[Deltanova] New application: ${app.name}`;
+    const subject = `[Deltanova][${app.variant ?? "?"}] New application: ${app.name}`;
     const text = `${app.name} <${app.email}> just applied.
 
 Their link: ${app.link}
@@ -127,6 +134,7 @@ Filter answer:
 ${app.answer}
 
 Locale: ${app.locale}
+Design variant: ${app.variant ?? "unknown"}
 `;
     const result = await resend.emails.send({
       from: resendFrom,

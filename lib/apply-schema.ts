@@ -13,6 +13,7 @@ export const applySchema = z.object({
     .max(2000)
     .describe("Filter-question answer"),
   locale: z.enum(["en", "es"]).default("en"),
+  variant: z.enum(["a", "b"]).optional(),
 });
 
 export type Application = z.infer<typeof applySchema>;
