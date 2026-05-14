@@ -15,7 +15,6 @@
  * One client module so reveal animations + form state + typewriter share scope.
  */
 
-import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
@@ -97,8 +96,7 @@ function TopBar({ onApply }: { onApply: () => void }) {
       style={{ background: "color-mix(in srgb, var(--background) 72%, transparent)" }}
     >
       <div className={containerStyle + " flex items-center justify-between py-4"}>
-        <a href="#top" className="flex items-center gap-2.5">
-          <Image src="/mark-navy.png" alt="" width={28} height={15} priority />
+        <a href="#top" className="flex items-center">
           <span className="font-semibold tracking-tight text-[18px]" style={{ color: "var(--orange)" }}>
             deltanova
           </span>
@@ -483,10 +481,12 @@ function Footer({ onApply }: { onApply: () => void }) {
   return (
     <footer className="hairline py-12">
       <div className={containerStyle + " flex flex-wrap items-center justify-between gap-6"}>
-        <div className="flex items-center gap-2.5" style={{ opacity: 0.85 }}>
-          <Image src="/mark-navy.png" alt="" width={22} height={12} />
+        <div className="flex items-center gap-3" style={{ opacity: 0.85 }}>
+          <span className="font-semibold tracking-tight text-[14px]" style={{ color: "var(--orange)" }}>
+            deltanova
+          </span>
           <span className="mono text-[12px]" style={{ color: "var(--ink-faint)", letterSpacing: "0.04em" }}>
-            © 2026 Deltanova
+            © 2026
           </span>
         </div>
         <div className="mono flex gap-7 text-[12px]" style={{ color: "var(--ink-dim)" }}>
