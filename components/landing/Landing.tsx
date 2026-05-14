@@ -15,7 +15,6 @@
  * One client module so reveal animations + form state + typewriter share scope.
  */
 
-import Link from "next/link";
 import { motion } from "framer-motion";
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
 
@@ -501,9 +500,6 @@ function Footer({ onApply }: { onApply: () => void }) {
           >
             Apply
           </a>
-          <Link href="mailto:irina@deltanova.io" className="hover:text-[var(--foreground)] transition-colors" style={{ color: "var(--ink-dim)" }}>
-            Contact
-          </Link>
         </div>
       </div>
     </footer>
