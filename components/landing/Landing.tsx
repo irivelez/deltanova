@@ -486,7 +486,7 @@ function Footer({ onApply }: { onApply: () => void }) {
         <div className="flex items-center gap-2.5" style={{ opacity: 0.85 }}>
           <Image src="/mark-navy.png" alt="" width={22} height={12} />
           <span className="mono text-[12px]" style={{ color: "var(--ink-faint)", letterSpacing: "0.04em" }}>
-            deltanova SAS · Colombia · 2026
+            © 2026 Deltanova
           </span>
         </div>
         <div className="mono flex gap-7 text-[12px]" style={{ color: "var(--ink-dim)" }}>
