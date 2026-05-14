@@ -15,33 +15,36 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://deltanova.io"),
   title: {
-    default: "Deltanova — Existing businesses, reborn AI-native",
+    default: "Deltanova — AI-native operations, delivered transparent",
     template: "%s · Deltanova",
   },
   description:
-    "Deltanova rebuilds existing businesses into AI-native operating models — transparently. Your customers see an instant upgrade. Your team works effortlessly. Your business compounds. Building with the first 10 design partners.",
+    "Deltanova rebuilds existing businesses into AI-native operating models. Your customers feel an instant upgrade. Your team stops fighting the operation. Your business stops leaking time. Running with one design partner in field services. 9 seats open.",
   openGraph: {
-    title: "Deltanova — Existing businesses, reborn AI-native",
+    title: "Deltanova — AI-native operations, delivered transparent",
     description:
-      "We rebuild existing businesses into AI-native operating models — transparently. Without the AI-adoption project. Without your team, your clients, or your stakeholders noticing the change.",
+      "We rebuild existing businesses into AI-native operating models — transparently. Your customers feel an instant upgrade. Your team stops fighting the operation. Your business stops leaking time.",
     url: "https://deltanova.io",
     siteName: "Deltanova",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Deltanova — Existing businesses, reborn AI-native",
+    title: "Deltanova — AI-native operations, delivered transparent",
     description:
-      "We rebuild existing businesses into AI-native operating models — transparently. Building with the first 10 design partners.",
+      "We rebuild existing businesses into AI-native operating models — transparently. Running with one design partner in field services. 9 seats open.",
   },
   alternates: {
     canonical: "https://deltanova.io",
   },
+  icons: {
+    icon: "/favicon.png",
+  },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0a0a0a",
-  colorScheme: "dark",
+  themeColor: "#f5f1ea",
+  colorScheme: "light",
 };
 
 export default function RootLayout({
@@ -54,9 +57,7 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-background text-foreground">
-        {children}
-      </body>
+      <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );
 }

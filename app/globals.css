@@ -1,41 +1,227 @@
 @import "tailwindcss";
 
+/* ─────────────────────────────────────────────────────────────
+ *  deltanova — paper theme tokens
+ *  Brand palette pulled from the deltanova logo (navy + orange).
+ *  Whisper accent: orange is RARE, mostly only in the logo + CTA.
+ * ───────────────────────────────────────────────────────────── */
+
 :root {
-  --background: #0a0a0a;
-  --foreground: #f5f5f5;
+  /* Canvas */
+  --background: #f5f1ea;
+  --bg-deep:    #ece7dc;
+  --bg-soft:    #ffffff;
+
+  /* Ink (navy on cream) */
+  --foreground:  #0b1326;
+  --ink-strong:  rgba(11, 19, 38, 0.92);
+  --ink-body:    rgba(11, 19, 38, 0.82);
+  --ink-dim:     rgba(11, 19, 38, 0.66);
+  --ink-half:    rgba(11, 19, 38, 0.50);
+  --ink-faint:   rgba(11, 19, 38, 0.42);
+  --ink-thread:  rgba(11, 19, 38, 0.22);
+  --ink-line:    rgba(11, 19, 38, 0.10);
+  --ink-hair:    rgba(11, 19, 38, 0.04);
+
+  /* Orange — used as signal, never decoration */
+  --orange:       #f0581c;
+  --orange-soft:  rgba(240, 88, 28, 0.14);
+  /* Whisper intensity: orange is dampened to 55% so it stays signal but not loud */
+  --orange-vis:   rgba(240, 88, 28, 0.62);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-orange:     var(--orange);
+  --color-ink-dim:    var(--ink-dim);
+  --color-ink-half:   var(--ink-half);
+  --color-ink-faint:  var(--ink-faint);
+  --color-ink-line:   var(--ink-line);
+  --color-ink-strong: var(--ink-strong);
   --font-sans: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
-html {
-  color-scheme: dark;
-}
+html { color-scheme: light; }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
   font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-::selection {
-  background: rgba(245, 245, 245, 0.15);
-  color: var(--foreground);
-}
+::selection { background: rgba(240, 88, 28, 0.28); color: var(--foreground); }
 
-/* Subtle radial gradient — sets the AI-native canvas without competing with copy */
+/* Subtle warmth wash — orange in the upper-left, navy in the lower-right */
 body::before {
   content: "";
-  position: fixed;
-  inset: 0;
+  position: fixed; inset: 0;
   background:
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(80, 200, 255, 0.06), transparent),
-    radial-gradient(ellipse 60% 50% at 100% 100%, rgba(80, 255, 180, 0.04), transparent);
+    radial-gradient(ellipse 70% 45% at 18% 8%, rgba(240, 88, 28, 0.05), transparent 60%),
+    radial-gradient(ellipse 55% 40% at 100% 100%, rgba(11, 19, 38, 0.04), transparent 60%);
   pointer-events: none;
   z-index: -1;
 }
+
+/* ── Type primitives ───────────────────────────────────────── */
+
+.h1 {
+  font-size: clamp(40px, 7.2vw, 96px);
+  line-height: 1.02;
+  letter-spacing: -0.025em;
+  font-weight: 500;
+  margin: 0;
+}
+.h2 {
+  font-size: clamp(30px, 4.4vw, 56px);
+  line-height: 1.06;
+  letter-spacing: -0.02em;
+  font-weight: 500;
+  margin: 0;
+}
+.lede {
+  font-size: clamp(17px, 1.4vw, 21px);
+  line-height: 1.55;
+  color: var(--ink-dim);
+}
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.eyebrow .accent { color: var(--orange-vis); }
+.muted-half { color: var(--ink-half); }
+.mono { font-family: var(--font-mono); }
+
+/* ── Buttons ───────────────────────────────────────────────── */
+
+.btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 14px 22px;
+  font-size: 15px; font-weight: 500;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color .18s ease, border-color .18s ease, color .18s ease, transform .18s ease;
+  user-select: none;
+}
+.btn:active { transform: translateY(1px); }
+/* Whisper CTA: outlined orange, not filled */
+.btn-primary {
+  background: transparent;
+  color: var(--orange);
+  border-color: var(--orange);
+}
+.btn-primary:hover { background: var(--orange-soft); }
+.btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-primary:disabled:hover { background: transparent; }
+
+.btn .arrow { transition: transform .18s ease; }
+.btn:hover:not(:disabled) .arrow { transform: translateX(3px); }
+
+/* ── Form ──────────────────────────────────────────────────── */
+
+.field-label {
+  display: flex; align-items: baseline; justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.field-label .idx { color: var(--ink-dim); margin-right: 10px; }
+.field-hint {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ink-faint);
+}
+.input-line {
+  width: 100%;
+  padding: 10px 0 12px;
+  background: transparent;
+  color: var(--foreground);
+  border: 0;
+  border-bottom: 1px solid var(--ink-line);
+  font-family: var(--font-sans);
+  font-size: 17px;
+  outline: none;
+  transition: border-color .18s ease;
+}
+.input-line::placeholder { color: var(--ink-faint); opacity: 0.6; }
+.input-line:focus { border-bottom-color: var(--foreground); }
+.input-block {
+  width: 100%;
+  min-height: 220px;
+  resize: vertical;
+  padding: 16px;
+  background: var(--ink-hair);
+  color: var(--foreground);
+  border: 1px solid var(--ink-line);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.55;
+  outline: none;
+  transition: border-color .18s ease;
+}
+.input-block:focus { border-color: var(--ink-dim); }
+.input-block::placeholder { color: var(--ink-faint); opacity: 0.6; }
+
+.counter { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; }
+.counter.ok   { color: #2f7a4d; }
+.counter.low  { color: #b07a16; }
+.counter.high { color: #b54b27; }
+.counter.idle { color: var(--ink-faint); }
+
+/* ── Stanza (numbered step rows) ───────────────────────────── */
+
+.stanza {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 28px;
+  padding: 28px 0;
+  border-top: 1px solid var(--ink-line);
+  align-items: start;
+}
+.stanza .n {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--ink-dim);
+  padding-top: 6px;
+}
+.stanza .copy {
+  font-size: clamp(18px, 1.5vw, 22px);
+  line-height: 1.45;
+  color: var(--ink-strong);
+  letter-spacing: -0.005em;
+}
+.stanza .copy .sub {
+  display: block;
+  margin-top: 6px;
+  font-size: 15px;
+  color: var(--ink-dim);
+  letter-spacing: 0;
+  line-height: 1.55;
+}
+
+/* ── Hairline divider ──────────────────────────────────────── */
+.hairline { border-top: 1px solid var(--ink-line); }
+
+/* ── Cursor blink ──────────────────────────────────────────── */
+.blink {
+  display: inline-block;
+  width: 0.55ch;
+  height: 1em;
+  background: var(--orange-vis);
+  animation: blink 1s steps(1) infinite;
+  margin-left: 4px;
+  vertical-align: -0.12em;
+}
+@keyframes blink { 50% { opacity: 0; } }

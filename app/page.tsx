@@ -1,13 +1,9 @@
-import { Hero } from "@/components/Hero";
-import { Manifesto } from "@/components/Manifesto";
-import { Footer } from "@/components/Footer";
+import Landing from "@/components/landing/Landing";
 
-export default function Home() {
+export default function HomePage() {
   return (
     <main className="flex-1">
-      <Hero />
-      <Manifesto />
-      <Footer />
+      <Landing />
     </main>
   );
 }
