@@ -15,24 +15,24 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://deltanova.io"),
   title: {
-    default: "Deltanova — AI-native operations, delivered transparent",
+    default: "Deltanova · AI-native operations, delivered transparent",
     template: "%s · Deltanova",
   },
   description:
     "Deltanova rebuilds existing businesses into AI-native operating models. Your customers feel an instant upgrade. Your team stops fighting the operation. Your business stops leaking time. Running with one design partner in field services. 9 seats open.",
   openGraph: {
-    title: "Deltanova — AI-native operations, delivered transparent",
+    title: "Deltanova · AI-native operations, delivered transparent",
     description:
-      "We rebuild existing businesses into AI-native operating models — transparently. Your customers feel an instant upgrade. Your team stops fighting the operation. Your business stops leaking time.",
+      "We rebuild existing businesses into AI-native operating models, transparently. Your customers feel an instant upgrade. Your team stops fighting the operation. Your business stops leaking time.",
     url: "https://deltanova.io",
     siteName: "Deltanova",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Deltanova — AI-native operations, delivered transparent",
+    title: "Deltanova · AI-native operations, delivered transparent",
     description:
-      "We rebuild existing businesses into AI-native operating models — transparently. Running with one design partner in field services. 9 seats open.",
+      "We rebuild existing businesses into AI-native operating models, transparently. Running with one design partner in field services. 9 seats open.",
   },
   alternates: {
     canonical: "https://deltanova.io",
