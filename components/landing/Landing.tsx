@@ -429,6 +429,13 @@ function Footer({ onCta }: { onCta: () => void }) {
           >
             Start a conversation
           </a>
+          <a
+            href="/privacy"
+            className="hover:text-[var(--foreground)] transition-colors"
+            style={{ color: "var(--ink-dim)" }}
+          >
+            Privacy
+          </a>
         </div>
       </div>
     </footer>
