@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Client } from "@notionhq/client";
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 import { applySchema, type Application } from "@/lib/apply-schema";
 import { supabase } from "@/lib/supabase";
 
@@ -9,15 +9,28 @@ export const maxDuration = 30;
 
 const notionToken = process.env.NOTION_TOKEN;
 const notionDbId = process.env.NOTION_DB_ID;
-const resendKey = process.env.RESEND_API_KEY;
-const resendFrom =
-  process.env.RESEND_FROM_EMAIL || "Deltanova <intake@deltanova.io>";
+
+const smtpHost = process.env.ZOHO_SMTP_HOST;
+const smtpPort = Number(process.env.ZOHO_SMTP_PORT || "587");
+const smtpUser = process.env.ZOHO_SMTP_USER;
+const smtpPass = process.env.ZOHO_SMTP_PASS;
+const fromEmail =
+  process.env.ZOHO_FROM_EMAIL || "Deltanova Team <hello@deltanova.io>";
+const replyTo = process.env.ZOHO_REPLY_TO || "hello@deltanova.io";
 const founderEmail = process.env.NOTIFY_EMAIL || "irina@deltanova.io";
 const enableApplicantAutoReply =
   process.env.ENABLE_APPLICANT_AUTOREPLY === "true";
 
 const notion = notionToken ? new Client({ auth: notionToken }) : null;
-const resend = resendKey ? new Resend(resendKey) : null;
+const transporter =
+  smtpHost && smtpUser && smtpPass
+    ? nodemailer.createTransport({
+        host: smtpHost,
+        port: smtpPort,
+        secure: smtpPort === 465,
+        auth: { user: smtpUser, pass: smtpPass },
+      })
+    : null;
 
 export async function POST(req: NextRequest) {
   let body: unknown;
@@ -62,12 +75,14 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Notion + Resend are best-effort mirrors. Failures here are logged but
-  // do not fail the request — the application is already safe in Supabase.
+  // Notion + SMTP are best-effort mirrors / notifications. Failures here are
+  // logged but do not fail the request — the application is already safe.
   const [notionResult, founderNotify, applicantReply] = await Promise.all([
     writeToNotion(app),
     sendFounderNotification(app),
-    enableApplicantAutoReply ? sendApplicantAutoReply(app) : Promise.resolve({ ok: false, reason: "autoreply-disabled" }),
+    enableApplicantAutoReply
+      ? sendApplicantAutoReply(app)
+      : Promise.resolve({ ok: false, reason: "autoreply-disabled" as const }),
   ]);
 
   return NextResponse.json({
@@ -118,7 +133,7 @@ async function writeToSupabase(app: Application) {
 
 async function writeToNotion(app: Application) {
   if (!notion || !notionDbId) {
-    return { ok: false, reason: "notion-disabled" };
+    return { ok: false as const, reason: "notion-disabled" };
   }
   try {
     const response = await notion.pages.create({
@@ -131,9 +146,7 @@ async function writeToNotion(app: Application) {
           object: "block",
           type: "heading_3",
           heading_3: {
-            rich_text: [
-              { type: "text", text: { content: "Contact" } },
-            ],
+            rich_text: [{ type: "text", text: { content: "Contact" } }],
           },
         },
         {
@@ -144,7 +157,7 @@ async function writeToNotion(app: Application) {
               {
                 type: "text",
                 text: {
-                  content: `${app.name} — ${app.email}\n${app.link}\nLocale: ${app.locale}\nDesign variant: ${app.variant ?? "unknown"}`,
+                  content: `${app.name} — ${app.email}\n${app.link}\nLocale: ${app.locale}`,
                 },
               },
             ],
@@ -154,9 +167,7 @@ async function writeToNotion(app: Application) {
           object: "block",
           type: "heading_3",
           heading_3: {
-            rich_text: [
-              { type: "text", text: { content: "Filter answer" } },
-            ],
+            rich_text: [{ type: "text", text: { content: "Filter answer" } }],
           },
         },
         {
@@ -170,17 +181,23 @@ async function writeToNotion(app: Application) {
         },
       ],
     });
-    return { ok: true, id: response.id };
+    return { ok: true as const, id: response.id };
   } catch (err) {
     console.error("[notion] application write failed", err);
-    return { ok: false, reason: "notion-write-failed", error: String(err) };
+    return {
+      ok: false as const,
+      reason: "notion-write-failed",
+      error: String(err),
+    };
   }
 }
 
 async function sendFounderNotification(app: Application) {
-  if (!resend) return { ok: false, reason: "resend-disabled" };
+  if (!transporter) {
+    return { ok: false as const, reason: "smtp-disabled" };
+  }
   try {
-    const subject = `[Deltanova][${app.variant ?? "?"}] New application: ${app.name}`;
+    const subject = `[Deltanova] New application: ${app.name}`;
     const text = `${app.name} <${app.email}> just applied.
 
 Their link: ${app.link}
@@ -189,25 +206,29 @@ Filter answer:
 ${app.answer}
 
 Locale: ${app.locale}
-Design variant: ${app.variant ?? "unknown"}
 `;
-    const result = await resend.emails.send({
-      from: resendFrom,
+    const result = await transporter.sendMail({
+      from: fromEmail,
       to: founderEmail,
+      replyTo,
       subject,
       text,
     });
-    if (result.error) {
-      return { ok: false, reason: "resend-error", error: result.error.message };
-    }
-    return { ok: true, id: result.data?.id };
+    return { ok: true as const, id: result.messageId };
   } catch (err) {
-    return { ok: false, reason: "resend-exception", error: String(err) };
+    console.error("[smtp] founder notification failed", err);
+    return {
+      ok: false as const,
+      reason: "smtp-exception",
+      error: String(err),
+    };
   }
 }
 
 async function sendApplicantAutoReply(app: Application) {
-  if (!resend) return { ok: false, reason: "resend-disabled" };
+  if (!transporter) {
+    return { ok: false as const, reason: "smtp-disabled" };
+  }
   try {
     const subject =
       app.locale === "es"
@@ -243,17 +264,20 @@ https://deltanova.io/#manifesto
 — Deltanova
 `;
 
-    const result = await resend.emails.send({
-      from: resendFrom,
+    const result = await transporter.sendMail({
+      from: fromEmail,
       to: app.email,
+      replyTo,
       subject,
       text,
     });
-    if (result.error) {
-      return { ok: false, reason: "resend-error", error: result.error.message };
-    }
-    return { ok: true, id: result.data?.id };
+    return { ok: true as const, id: result.messageId };
   } catch (err) {
-    return { ok: false, reason: "resend-exception", error: String(err) };
+    console.error("[smtp] applicant auto-reply failed", err);
+    return {
+      ok: false as const,
+      reason: "smtp-exception",
+      error: String(err),
+    };
   }
 }
