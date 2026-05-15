@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Client } from "@notionhq/client";
 import { Resend } from "resend";
 import { applySchema, type Application } from "@/lib/apply-schema";
+import { supabase } from "@/lib/supabase";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -47,6 +48,22 @@ export async function POST(req: NextRequest) {
   const app = parsed.data;
   console.log("[apply] submission", JSON.stringify(app));
 
+  // Supabase is the canonical store. If it fails, return 500 so the client
+  // can retry — we don't want submissions silently dropped.
+  const supabaseResult = await writeToSupabase(app);
+  if (!supabaseResult.ok) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "persistence-failed",
+        detail: supabaseResult,
+      },
+      { status: 500 },
+    );
+  }
+
+  // Notion + Resend are best-effort mirrors. Failures here are logged but
+  // do not fail the request — the application is already safe in Supabase.
   const [notionResult, founderNotify, applicantReply] = await Promise.all([
     writeToNotion(app),
     sendFounderNotification(app),
@@ -55,10 +72,48 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({
     ok: true,
+    id: supabaseResult.id,
     notion: notionResult,
     founderNotify,
     applicantReply,
   });
+}
+
+async function writeToSupabase(app: Application) {
+  if (!supabase) {
+    return { ok: false as const, reason: "supabase-disabled" };
+  }
+  try {
+    const { data, error } = await supabase
+      .from("applications")
+      .insert({
+        name: app.name,
+        email: app.email,
+        link: app.link,
+        answer: app.answer,
+        locale: app.locale,
+        variant: app.variant,
+      })
+      .select("id")
+      .single();
+
+    if (error) {
+      console.error("[supabase] insert failed", error);
+      return {
+        ok: false as const,
+        reason: "supabase-insert-failed",
+        error: error.message,
+      };
+    }
+    return { ok: true as const, id: data.id as string };
+  } catch (err) {
+    console.error("[supabase] exception", err);
+    return {
+      ok: false as const,
+      reason: "supabase-exception",
+      error: String(err),
+    };
+  }
 }
 
 async function writeToNotion(app: Application) {
