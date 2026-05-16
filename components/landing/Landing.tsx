@@ -194,11 +194,11 @@ function Hero({ emailInputRef }: { emailInputRef: React.RefObject<HTMLInputEleme
       >
         <div className={containerStyle}>
           <Reveal>
-            <h1 className="h1 max-w-[22ch]">Pick a time.</h1>
+            <h1 className="h1 max-w-[22ch]">Thanks for reaching out.</h1>
           </Reveal>
           <Reveal delay={0.08}>
-            <p className="lede mt-10 max-w-[44ch]">
-              30 minutes. We&rsquo;ll see if you qualify.
+            <p className="lede mt-10 max-w-[52ch]">
+              Would love to hear what brought you here, walk you through what we&rsquo;re building at deltanova, and explore working together. Pick a slot that works for you below.
             </p>
           </Reveal>
           <Reveal delay={0.14}>
