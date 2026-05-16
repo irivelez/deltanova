@@ -17,7 +17,11 @@
 
 import { motion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import Cal, { getCalApi } from "@calcom/embed-react";
 import { isWorkEmail } from "@/lib/apply-schema";
+
+const CAL_LINK = "irina-velez-uwatgh/30min";
+const CAL_NAMESPACE = "30min";
 
 /* ─── Reveal — small fade + 8px rise on first viewport entry ──────────── */
 function Reveal({
@@ -174,20 +178,38 @@ function Hero({ emailInputRef }: { emailInputRef: React.RefObject<HTMLInputEleme
     }
   }
 
+  useEffect(() => {
+    if (status !== "success") return;
+    (async () => {
+      const cal = await getCalApi({ namespace: CAL_NAMESPACE });
+      cal("ui", { hideEventTypeDetails: false, layout: "month_view" });
+    })();
+  }, [status]);
+
   if (status === "success") {
     return (
       <section
-        className="relative flex min-h-[calc(100vh-60px)] flex-col justify-center py-24 md:py-28"
+        className="relative flex min-h-[calc(100vh-60px)] flex-col py-24 md:py-28"
         id="top"
       >
         <div className={containerStyle}>
           <Reveal>
-            <h1 className="h1 max-w-[18ch]">Thanks.</h1>
+            <h1 className="h1 max-w-[22ch]">Pick a time.</h1>
           </Reveal>
           <Reveal delay={0.08}>
             <p className="lede mt-10 max-w-[44ch]">
-              We&rsquo;ll be in touch at <strong>{email.trim()}</strong>.
+              30 minutes. We&rsquo;ll see if you qualify.
             </p>
+          </Reveal>
+          <Reveal delay={0.14}>
+            <div className="mt-14" style={{ height: 720 }}>
+              <Cal
+                namespace={CAL_NAMESPACE}
+                calLink={CAL_LINK}
+                style={{ width: "100%", height: "100%", overflow: "scroll" }}
+                config={{ layout: "month_view", email: email.trim() }}
+              />
+            </div>
           </Reveal>
         </div>
       </section>
@@ -409,13 +431,20 @@ function Footer({ onCta }: { onCta: () => void }) {
   return (
     <footer className="hairline py-12">
       <div className={containerStyle + " flex flex-wrap items-center justify-between gap-6"}>
-        <div className="flex items-center gap-3" style={{ opacity: 0.85 }}>
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2" style={{ opacity: 0.85 }}>
           <span className="font-semibold tracking-tight text-[14px]" style={{ color: "var(--orange)" }}>
             deltanova
           </span>
           <span className="mono text-[12px]" style={{ color: "var(--ink-faint)", letterSpacing: "0.04em" }}>
             © 2026
           </span>
+          <a
+            href="/privacy"
+            className="mono text-[12px] hover:text-[var(--foreground)] transition-colors"
+            style={{ color: "var(--ink-faint)", letterSpacing: "0.04em" }}
+          >
+            Privacy
+          </a>
         </div>
         <div className="mono flex gap-7 text-[12px]" style={{ color: "var(--ink-dim)" }}>
           <a
@@ -428,13 +457,6 @@ function Footer({ onCta }: { onCta: () => void }) {
             style={{ color: "var(--ink-dim)" }}
           >
             Start a conversation
-          </a>
-          <a
-            href="/privacy"
-            className="hover:text-[var(--foreground)] transition-colors"
-            style={{ color: "var(--ink-dim)" }}
-          >
-            Privacy
           </a>
         </div>
       </div>
